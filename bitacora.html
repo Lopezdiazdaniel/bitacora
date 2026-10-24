@@ -78,13 +78,14 @@
                     <button class="btn btn-danger fw-bold shadow-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#modalFiltroPdf">
                         <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generar PDF / Imprimir
                     </button>
-                    <button class="btn btn-primary fw-bold shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#panelCaptura">
+                    <!-- BOTÓN CORREGIDO: Apunta exactamente al ID panelCaptura -->
+                    <button class="btn btn-primary fw-bold shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#panelCaptura" aria-expanded="false" aria-controls="panelCaptura">
                         <i class="bi bi-plus-circle me-1"></i> Nuevo Registro
                     </button>
                 </div>
             </div>
 
-            <!-- Panel de Captura -->
+            <!-- Panel de Captura de Datos (Colapsable con ID correcto) -->
             <div class="collapse mb-4" id="panelCaptura">
                 <div class="card shadow-sm border-0 rounded-4">
                     <div class="card-header text-white rounded-top-4" style="background-color: var(--azul-profundo);">
@@ -227,7 +228,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.5.3.2/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const hoyStr = new Date().toISOString().split('T')[0];
         document.getElementById('reg-fecha').value = hoyStr;
@@ -240,7 +241,6 @@
         document.getElementById('reg-guardia').value = guardiaActual;
         document.getElementById('nombre-guardia-activo').textContent = guardiaActual;
 
-        // Cargar los accesos desde datos_prueba.json al iniciar
         async function cargarDatosIniciales() {
             try {
                 const response = await fetch('datos_prueba.json');
@@ -351,8 +351,8 @@
         }
 
         function filtrarRegistros() {
-            const texto = document.getElementById('input-buscar').value;
-            renderTablaAccesos(texto);
+            const TEXTO = document.getElementById('input-buscar').value;
+            renderTablaAccesos(TEXTO);
         }
 
         function autocompletarRapido(nombre, placas, modelo, color, casa, asunto) {
