@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitácora de Accesos - Fraccionamiento</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --azul-oscuro: #1b4f91;
+            --azul-profundo: #3182ce;
+        }
+        .navbar-brand { font-weight: bold; }
+        .section-view { display: none; }
+        .section-view.active { display: block; }
+
+        @media print {
+            body { background-color: #fff !important; }
+            .navbar, .btn, .collapse, .input-group, th:last-child, td:last-child {
+                display: none !important;
+            }
+            .card { border: none !important; box-shadow: none !important; }
+            .container { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .table { width: 100% !important; border-collapse: collapse !important; }
+            .table th, .table td { border: 1px solid #dee2e6 !important; padding: 8px !important; text-transform: uppercase; }
+            .print-header { display: block !important; text-align: center; margin-bottom: 20px; }
+        }
+        .print-header { display: none; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- MENÚ SUPERIOR -->
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm px-4" style="background-color: var(--azul-oscuro);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="bi bi-shield-shaded text-info"></i> Control Fraccionamiento</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center gap-3">
+                    <li class="nav-item">
+                        <a class="nav-link active fw-bold" href="#" onclick="cambiarSeccion('accesos', event)"><i class="bi bi-door-open me-1"></i> Accesos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold" href="#" onclick="cambiarSeccion('guardia', event)"><i class="bi bi-person-badge me-1"></i> Guardia en Turno</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light btn-sm px-3" href="login.html"><i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+
+        <!-- ================= SECCIÓN 1: ACCESOS ================= -->
+        <div id="seccion-accesos" class="section-view active">
+            
+            <div class="print-header">
+                <h2>Fraccionamiento Residencial - Reporte de Bitácora</h2>
+                <p class="text-muted" id="texto-rango-impresion">Reporte general de accesos</p>
+                <hr>
+            </div>
+
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white"><i class="bi bi-search text-primary"></i></span>
+                        <input type="text" class="form-control" id="input-buscar" placeholder="Búsqueda general (Nombre, Placas, Casa)..." onkeyup="filtrarRegistros()">
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <button class="btn btn-danger fw-bold shadow-sm me-2" type="button" data-bs-toggle="modal" data-bs-target="#modalFiltroPdf">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generar PDF / Imprimir
+                    </button>
+                    <button class="btn btn-primary fw-bold shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#panelCaptura">
+                        <i class="bi bi-plus-circle me-1"></i> Nuevo Registro
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel de Captura -->
+            <div class="collapse mb-4" id="panelCaptura">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-header text-white rounded-top-4" style="background-color: var(--azul-profundo);">
+                        <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Registrar Nuevo Acceso (En MAYÚSCULAS)</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-acceso" onsubmit="guardarAcceso(event)">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small">Fecha de Ingreso</label>
+                                    <input type="date" class="form-control" id="reg-fecha" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small">Nombre del Visitante</label>
+                                    <input type="text" class="form-control text-uppercase" id="reg-nombre" placeholder="Nombre completo" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label fw-bold small">Placas</label>
+                                    <input type="text" class="form-control text-uppercase" id="reg-placas" placeholder="Ej. ABC-123">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label fw-bold small">Modelo</label>
+                                    <input type="text" class="form-control text-uppercase" id="reg-modelo" placeholder="Ej. Versa">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label fw-bold small">Color</label>
+                                    <input type="text" class="form-control text-uppercase" id="reg-color" placeholder="Ej. Blanco">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small">Asunto / Tipo</label>
+                                    <select class="form-select" id="reg-asunto" required>
+                                        <option value="VISITA">Visita</option>
+                                        <option value="PAQUETERÍA">Paquetería</option>
+                                        <option value="GAS">Gas</option>
+                                        <option value="AGUA">Agua</option>
+                                        <option value="UBER TAXI">Uber Taxi</option>
+                                        <option value="UBER EAT'S">Uber Eat's</option>
+                                        <option value="DIDI TAXI">Didi Taxi</option>
+                                        <option value="DIDI COMIDA">Didi Comida</option>
+                                        <option value="MOTOMANDADO">Motomandado</option>
+                                        <option value="FARMACIA">Farmacia</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small">Casa / Lote Destino</label>
+                                    <input type="text" class="form-control text-uppercase" id="reg-casa" placeholder="Ej. Casa 45" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small">Guardia en Turno</label>
+                                    <input type="text" class="form-control bg-light text-uppercase" id="reg-guardia" readonly>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-success w-100 fw-bold shadow-sm">
+                                        <i class="bi bi-save me-1"></i> Guardar Entrada
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center rounded-top-4">
+                    <h5 class="mb-0 text-secondary"><i class="bi bi-table me-2"></i> Bitácora de Accesos</h5>
+                    <span class="badge bg-primary px-3 py-2" id="contador-accesos">0 Registros</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-uppercase" id="tabla-accesos">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Fecha / Hora</th>
+                                    <th>Nombre</th>
+                                    <th>Placas / Auto</th>
+                                    <th>Asunto</th>
+                                    <th>Casa</th>
+                                    <th>Guardia</th>
+                                    <th>Salida</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpo-tabla">
+                                <tr><td colspan="8" class="text-center text-muted py-4">Cargando registros...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= SECCIÓN 2: GUARDIA EN TURNO ================= -->
+        <div id="seccion-guardia" class="section-view">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 rounded-4 mb-4">
+                        <div class="card-header text-white text-center py-3 rounded-top-4" style="background-color: var(--azul-oscuro);">
+                            <h4 class="mb-0"><i class="bi bi-person-badge-fill me-2"></i> Guardia Actualmente en Turno</h4>
+                        </div>
+                        <div class="card-body text-center p-4">
+                            <div class="display-6 fw-bold text-primary mb-2 text-uppercase" id="nombre-guardia-activo">JUAN PÉREZ</div>
+                            <p class="text-muted">Caseta Principal - Turno Activo</p>
+                            <hr>
+                            <button class="btn btn-outline-primary btn-sm" onclick="cambiarGuardiaPrompt()"><i class="bi bi-arrow-repeat"></i> Cambiar / Actualizar Guardia</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= MODAL PDF ================= -->
+    <div class="modal fade" id="modalFiltroPdf" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header text-white" style="background-color: var(--azul-oscuro);">
+                    <h5 class="modal-title"><i class="bi bi-file-earmark-pdf me-2"></i> Generar Reporte PDF por Fechas</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Fecha de Inicio</label>
+                        <input type="date" class="form-control" id="pdf-fecha-inicio">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Fecha de Fin</label>
+                        <input type="date" class="form-control" id="pdf-fecha-fin">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light rounded-bottom-4">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger btn-sm fw-bold" onclick="generarReportePDF()">
+                        <i class="bi bi-printer-fill me-1"></i> Imprimir / Guardar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.5.3.2/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const hoyStr = new Date().toISOString().split('T')[0];
+        document.getElementById('reg-fecha').value = hoyStr;
+        document.getElementById('pdf-fecha-inicio').value = hoyStr;
+        document.getElementById('pdf-fecha-fin').value = hoyStr;
+
+        let listaAccesos = [];
+        let guardiaActual = sessionStorage.getItem('guardia_activo') || 'JUAN PÉREZ';
+
+        document.getElementById('reg-guardia').value = guardiaActual;
+        document.getElementById('nombre-guardia-activo').textContent = guardiaActual;
+
+        // Cargar los accesos desde datos_prueba.json al iniciar
+        async function cargarDatosIniciales() {
+            try {
+                const response = await fetch('datos_prueba.json');
+                const data = await response.json();
+                listaAccesos = data.accesos || [];
+                renderTablaAccesos();
+            } catch (error) {
+                console.error("Error al cargar datos_prueba.json:", error);
+                document.getElementById('cuerpo-tabla').innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Error al cargar datos. Asegúrate de usar Live Server.</td></tr>`;
+            }
+        }
+        cargarDatosIniciales();
+
+        function cambiarSeccion(seccion, event) {
+            event.preventDefault();
+            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(el => el.classList.remove('active'));
+            
+            if(seccion === 'accesos') {
+                document.getElementById('seccion-accesos').classList.add('active');
+                event.currentTarget.classList.add('active');
+            } else if(seccion === 'guardia') {
+                document.getElementById('seccion-guardia').classList.add('active');
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        function guardarAcceso(e) {
+            e.preventDefault();
+            const nuevo = {
+                id: Date.now(),
+                fecha: document.getElementById('reg-fecha').value,
+                nombre: document.getElementById('reg-nombre').value.trim().toUpperCase(),
+                placas: (document.getElementById('reg-placas').value.trim() || 'S/N').toUpperCase(),
+                modelo: (document.getElementById('reg-modelo').value.trim() || '-').toUpperCase(),
+                color: (document.getElementById('reg-color').value.trim() || '-').toUpperCase(),
+                asunto: document.getElementById('reg-asunto').value.toUpperCase(),
+                casa: document.getElementById('reg-casa').value.trim().toUpperCase(),
+                guardia: guardiaActual.toUpperCase(),
+                horaEntrada: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                horaSalida: null
+            };
+
+            listaAccesos.unshift(nuevo);
+            renderTablaAccesos();
+            document.getElementById('form-acceso').reset();
+            document.getElementById('reg-fecha').value = hoyStr;
+            document.getElementById('reg-guardia').value = guardiaActual;
+            
+            bootstrap.Collapse.getInstance(document.getElementById('panelCaptura')).hide();
+        }
+
+        function registrarSalida(id) {
+            const item = listaAccesos.find(i => i.id === id);
+            if (item) {
+                item.horaSalida = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                renderTablaAccesos();
+            }
+        }
+
+        function renderTablaAccesos(filtro = '') {
+            const tbody = document.getElementById('cuerpo-tabla');
+            tbody.innerHTML = '';
+
+            let filtroUpper = filtro.trim().toUpperCase();
+            let datosFiltrados = listaAccesos.filter(item => 
+                item.nombre.includes(filtroUpper) ||
+                item.placas.includes(filtroUpper) ||
+                item.asunto.includes(filtroUpper) ||
+                item.casa.includes(filtroUpper) ||
+                (item.fecha && item.fecha.includes(filtroUpper))
+            );
+
+            document.getElementById('contador-accesos').textContent = `${datosFiltrados.length} Registros`;
+
+            if (datosFiltrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No se encontraron registros.</td></tr>`;
+                return;
+            }
+
+            datosFiltrados.forEach(item => {
+                let badgeAsunto = 'bg-secondary';
+                if(item.asunto.includes('VISITA')) badgeAsunto = 'bg-primary';
+                if(item.asunto.includes('UBER') || item.asunto.includes('DIDI')) badgeAsunto = 'bg-dark';
+                if(item.asunto.includes('PAQUETERÍA')) badgeAsunto = 'bg-warning text-dark';
+                if(item.asunto.includes('GAS') || item.asunto.includes('AGUA')) badgeAsunto = 'bg-success';
+
+                let estadoSalida = item.horaSalida 
+                    ? `<span class="badge bg-success">${item.horaSalida}</span>` 
+                    : `<button class="btn btn-sm btn-outline-danger py-0" onclick="registrarSalida(${item.id})">Dar Salida</button>`;
+
+                let fila = `
+                    <tr>
+                        <td><small class="text-muted d-block">${item.fecha || hoyStr}</small><span class="fw-bold text-dark">${item.horaEntrada}</span></td>
+                        <td>${item.nombre}</td>
+                        <td><small class="text-muted">${item.placas} (${item.modelo} - ${item.color})</small></td>
+                        <td><span class="badge ${badgeAsunto}">${item.asunto}</span></td>
+                        <td class="fw-bold text-primary">CASA ${item.casa}</td>
+                        <td><small>${item.guardia}</small></td>
+                        <td>${estadoSalida}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary py-0" title="Reingresar rápido" onclick="autocompletarRapido('${item.nombre}', '${item.placas}', '${item.modelo}', '${item.color}', '${item.casa}', '${item.asunto}')"><i class="bi bi-arrow-repeat"></i></button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += fila;
+            });
+        }
+
+        function filtrarRegistros() {
+            const texto = document.getElementById('input-buscar').value;
+            renderTablaAccesos(texto);
+        }
+
+        function autocompletarRapido(nombre, placas, modelo, color, casa, asunto) {
+            document.getElementById('reg-nombre').value = nombre;
+            document.getElementById('reg-placas').value = placas;
+            document.getElementById('reg-modelo').value = modelo;
+            document.getElementById('reg-color').value = color;
+            document.getElementById('reg-casa').value = casa;
+            document.getElementById('reg-asunto').value = asunto;
+            
+            const collapseElement = document.getElementById('panelCaptura');
+            new bootstrap.Collapse(collapseElement, {toggle: true});
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function seleccionarGuardia(nombre) {
+            guardiaActual = nombre.toUpperCase();
+            sessionStorage.setItem('guardia_activo', guardiaActual);
+            document.getElementById('nombre-guardia-activo').textContent = guardiaActual;
+            document.getElementById('reg-guardia').value = guardiaActual;
+            alert(`Guardia en turno actualizado a: ${guardiaActual}`);
+        }
+
+        function cambiarGuardiaPrompt() {
+            let nuevo = prompt("Ingrese el nombre completo del guardia en turno:", guardiaActual);
+            if(nuevo && nuevo.trim() !== "") {
+                seleccionarGuardia(nuevo.trim());
+            }
+        }
+
+        function generarReportePDF() {
+            const fechaInicio = document.getElementById('pdf-fecha-inicio').value;
+            const fechaFin = document.getElementById('pdf-fecha-fin').value;
+
+            if(!fechaInicio || !fechaFin) {
+                alert("Por favor selecciona ambas fechas.");
+                return;
+            }
+
+            document.getElementById('texto-rango-impresion').textContent = `PERÍODO DEL ${fechaInicio} AL ${fechaFin}`;
+
+            const tbody = document.getElementById('cuerpo-tabla');
+            tbody.innerHTML = '';
+
+            let filtradosPorFecha = listaAccesos.filter(item => {
+                let fItem = item.fecha || hoyStr;
+                return fItem >= fechaInicio && fItem <= fechaFin;
+            });
+
+            if(filtradosPorFecha.length === 0) {
+                alert("No hay registros en el rango de fechas seleccionado.");
+                return;
+            }
+
+            filtradosPorFecha.forEach(item => {
+                let fila = `
+                    <tr>
+                        <td>${item.fecha || hoyStr} - ${item.horaEntrada}</td>
+                        <td>${item.nombre}</td>
+                        <td>${item.placas}</td>
+                        <td>${item.asunto}</td>
+                        <td>CASA ${item.casa}</td>
+                        <td>${item.guardia}</td>
+                        <td>${item.horaSalida || 'EN SITIO'}</td>
+                        <td>-</td>
+                    </tr>
+                `;
+                tbody.innerHTML += fila;
+            });
+
+            const modalEl = document.getElementById('modalFiltroPdf');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            modalInstance.hide();
+
+            setTimeout(() => {
+                window.print();
+                renderTablaAccesos();
+            }, 500);
+        }
+    </script>
+</body>
+</html>

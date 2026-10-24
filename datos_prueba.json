@@ -1,0 +1,46 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "usuario": "ADMIN",
+      "password": "123",
+      "nombre_completo": "ADMINISTRADOR FRACCIONAMIENTO",
+      "rol": "ADMINISTRADOR"
+    },
+    {
+      "id": 2,
+      "usuario": "GUARDIA1",
+      "password": "123",
+      "nombre_completo": "JUAN PÉREZ",
+      "rol": "GUARDIAN"
+    }
+  ],
+  "accesos": [
+    {
+      "id": 1740000001,
+      "fecha": "2026-06-07",
+      "nombre": "CARLOS LÓPEZ",
+      "placas": "ABC-123",
+      "modelo": "NISSAN VERSA",
+      "color": "BLANCO",
+      "asunto": "VISITA",
+      "casa": "12",
+      "guardia": "JUAN PÉREZ",
+      "horaEntrada": "08:30 AM",
+      "horaSalida": "09:15 AM"
+    },
+    {
+      "id": 1740000002,
+      "fecha": "2026-06-07",
+      "nombre": "REPA-EXPRESS",
+      "placas": "XYZ-789",
+      "modelo": "MOTOCICLETA ITALIKA",
+      "color": "NEGRO",
+      "asunto": "PAQUETERÍA",
+      "casa": "45",
+      "guardia": "JUAN PÉREZ",
+      "horaEntrada": "10:15 AM",
+      "horaSalida": null
+    }
+  ]
+}
